@@ -1,0 +1,15 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('clock-in/', views.clock_in, name='clock_in'),
+    path('clock-out/', views.clock_out, name='clock_out'),
+    path('today/', views.attendance_today, name='attendance_today'),
+    path('history/', views.attendance_history, name='attendance_history'),
+    path('leave/request/', views.LeaveRequestCreateView.as_view(), name='leave_request'),
+    path('leave/balance/', views.leave_balance, name='leave_balance'),
+    path('leave/requests/', views.leave_requests, name='leave_requests'),
+    path('leave/<int:leave_id>/approve/', views.approve_leave, name='approve_leave'),
+    path('leave/<int:leave_id>/reject/', views.reject_leave, name='reject_leave'),
+    path('admin/report/', views.admin_attendance_report, name='admin_report'),
+]
