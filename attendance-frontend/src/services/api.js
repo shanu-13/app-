@@ -66,6 +66,8 @@ export const attendanceAPI = {
   getLeaveRequests: () => api.get('/attendance/leave/requests/'),
   approveLeave: (leaveId) => api.patch(`/attendance/leave/${leaveId}/approve/`),
   rejectLeave: (leaveId) => api.patch(`/attendance/leave/${leaveId}/reject/`),
+  getNotifications: () => api.get('/attendance/notifications/'),
+  markNotificationRead: (notificationId) => api.patch(`/attendance/notifications/${notificationId}/read/`),
 };
 
 export const userAPI = {

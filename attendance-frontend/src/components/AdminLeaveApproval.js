@@ -58,46 +58,66 @@ const AdminLeaveApproval = () => {
             }}></div>
           </div>
         ) : (
-          <div>
+          <div style={{maxHeight: '600px', overflowY: 'auto'}}>
             {leaveRequests.map((request) => (
-              <div key={request.id} className="card" style={{marginBottom: '16px', padding: '16px'}}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                  <div>
-                    <h3 className="font-bold">{request.user?.first_name} {request.user?.last_name}</h3>
-                    <p style={{color: '#6b7280', fontSize: '14px'}}>
-                      {request.leave_type} - {request.start_date} to {request.end_date}
-                    </p>
-                    <p style={{marginTop: '8px'}}>{request.reason}</p>
+              <div key={request.id} style={{
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '12px',
+                marginBottom: '8px',
+                backgroundColor: '#ffffff'
+              }}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                  <div style={{flex: 1}}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px'}}>
+                      <h4 style={{margin: 0, fontWeight: 'bold', fontSize: '16px'}}>{request.employee_name}</h4>
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontSize: '11px',
+                        backgroundColor: request.status === 'approved' ? '#d1fae5' : request.status === 'rejected' ? '#fee2e2' : '#fef3c7',
+                        color: request.status === 'approved' ? '#065f46' : request.status === 'rejected' ? '#991b1b' : '#92400e'
+                      }}>
+                        {request.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <div style={{display: 'flex', gap: '16px', fontSize: '13px', color: '#6b7280', marginBottom: '4px'}}>
+                      <span>ID: {request.employee_id}</span>
+                      <span>{request.leave_type.replace('_', ' ').toUpperCase()}</span>
+                      <span>{request.start_date} to {request.end_date}</span>
+                    </div>
+                    <p style={{margin: 0, fontSize: '13px', color: '#374151'}}>{request.reason}</p>
                   </div>
-                  <div style={{display: 'flex', gap: '8px'}}>
-                    {request.status === 'pending' && (
-                      <>
-                        <button
-                          onClick={() => handleApproveLeave(request.id)}
-                          className="btn btn-success"
-                          style={{padding: '8px 16px'}}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleRejectLeave(request.id)}
-                          className="btn btn-danger"
-                          style={{padding: '8px 16px'}}
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      backgroundColor: request.status === 'approved' ? '#d1fae5' : request.status === 'rejected' ? '#fee2e2' : '#fef3c7',
-                      color: request.status === 'approved' ? '#065f46' : request.status === 'rejected' ? '#991b1b' : '#92400e'
-                    }}>
-                      {request.status}
-                    </span>
-                  </div>
+                  {request.status === 'pending' && (
+                    <div style={{display: 'flex', gap: '6px'}}>
+                      <button
+                        onClick={() => handleApproveLeave(request.id)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          backgroundColor: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleRejectLeave(request.id)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          backgroundColor: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

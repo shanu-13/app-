@@ -1,11 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { attendanceAPI } from '../services/api';
 
 const Layout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      fetchUnreadNotifications();
+      
+      // Listen for notification read events
+      const handleNotificationRead = () => {
+        fetchUnreadNotifications();
+      };
+      
+      window.addEventListener('notificationRead', handleNotificationRead);
+      return () => window.removeEventListener('notificationRead', handleNotificationRead);
+    }
+  }, [isAdmin]);
+
+  const fetchUnreadNotifications = async () => {
+    try {
+      const response = await attendanceAPI.getNotifications();
+      const unread = response.data.filter(notif => !notif.is_read).length;
+      setUnreadCount(unread);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
 
   const navigation = isAdmin ? [
     { name: 'Dashboard', href: '/dashboard' },
@@ -62,6 +88,42 @@ const Layout = ({ children }) => {
                 {item.name}
               </button>
             ))}
+            
+            {!isAdmin && (
+              <button
+                onClick={() => handleNavigation('/notifications')}
+                className="btn"
+                style={{
+                  width: '100%',
+                  marginBottom: '8px',
+                  textAlign: 'left',
+                  backgroundColor: isActive('/notifications') ? '#eff6ff' : 'transparent',
+                  color: isActive('/notifications') ? '#3b82f6' : '#374151',
+                  border: 'none',
+                  padding: '12px 16px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <span style={{
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '20px',
+                    height: '20px',
+                    fontSize: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            )}
             
             {isAdmin && (
               <>

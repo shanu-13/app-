@@ -46,15 +46,14 @@ A professional attendance management system built with React frontend and Django
 2. Install dependencies: `npm install`
 3. Start development server: `npm start`
 
-## Default Login Credentials
+## Login Credentials
 
-**Admin:**
-- Username: `admin`
-- Password: `admin123`
+To access the system, you'll need to create user accounts through the Django admin interface or by using the admin panel's employee management feature.
 
-**Employee:**
-- Username: `employee1`
-- Password: `emp123`
+**Initial Setup:**
+1. Create a superuser account using: `python manage.py createsuperuser`
+2. Use the admin interface to create additional users with appropriate roles
+3. Employees can be created through the admin portal's employee management section
 
 ## Project Structure
 

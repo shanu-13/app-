@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Sum
 from datetime import datetime, timedelta
-from .models import AttendanceRecord, BreakRecord, LeaveRequest, MonthlyLeaveBalance
-from .serializers import AttendanceRecordSerializer, BreakRecordSerializer, LeaveRequestSerializer, MonthlyLeaveBalanceSerializer
+from .models import AttendanceRecord, BreakRecord, LeaveRequest, MonthlyLeaveBalance, Notification
+from .serializers import AttendanceRecordSerializer, BreakRecordSerializer, LeaveRequestSerializer, MonthlyLeaveBalanceSerializer, NotificationSerializer
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
@@ -126,6 +126,18 @@ def approve_leave(request, leave_id):
         leave_request.status = 'approved'
         leave_request.approved_by = request.user
         leave_request.save()
+        
+        # Create notification
+        try:
+            Notification.objects.create(
+                user=leave_request.user,
+                title='Leave Request Approved',
+                message=f'Your {leave_request.leave_type} leave request from {leave_request.start_date} to {leave_request.end_date} has been approved.',
+                notification_type='leave_approved'
+            )
+        except Exception:
+            pass
+        
         return Response({'message': 'Leave approved'})
     except LeaveRequest.DoesNotExist:
         return Response({'error': 'Leave request not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -141,6 +153,39 @@ def reject_leave(request, leave_id):
         leave_request.status = 'rejected'
         leave_request.approved_by = request.user
         leave_request.save()
+        
+        # Create notification
+        try:
+            Notification.objects.create(
+                user=leave_request.user,
+                title='Leave Request Rejected',
+                message=f'Your {leave_request.leave_type} leave request from {leave_request.start_date} to {leave_request.end_date} has been rejected.',
+                notification_type='leave_rejected'
+            )
+        except Exception:
+            pass
+        
         return Response({'message': 'Leave rejected'})
     except LeaveRequest.DoesNotExist:
         return Response({'error': 'Leave request not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def notifications(request):
+    try:
+        notifications = Notification.objects.filter(user=request.user)[:20]
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+    except Exception:
+        return Response([])
+
+@api_view(['PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def mark_notification_read(request, notification_id):
+    try:
+        notification = Notification.objects.get(id=notification_id, user=request.user)
+        notification.is_read = True
+        notification.save()
+        return Response({'message': 'Notification marked as read'})
+    except Notification.DoesNotExist:
+        return Response({'error': 'Notification not found'}, status=status.HTTP_404_NOT_FOUND)

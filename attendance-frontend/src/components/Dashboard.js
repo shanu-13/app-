@@ -9,10 +9,12 @@ const Dashboard = () => {
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     fetchTodayAttendance();
     fetchLeaveBalance();
+    fetchNotifications();
     
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -36,6 +38,15 @@ const Dashboard = () => {
       setLeaveBalance(response.data);
     } catch (error) {
       console.error('Error fetching leave balance:', error);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await attendanceAPI.getNotifications();
+      setNotifications(response.data.slice(0, 3)); // Show only latest 3
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
     }
   };
 
@@ -79,6 +90,17 @@ const Dashboard = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'leave_approved':
+        return '✅';
+      case 'leave_rejected':
+        return '❌';
+      default:
+        return '📢';
+    }
   };
 
   return (
@@ -185,6 +207,48 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Notifications Section */}
+      {!isAdmin && (
+        <div className="card">
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+            <h3 className="font-bold" style={{color: '#111827'}}>Recent Notifications</h3>
+            <button 
+              onClick={() => window.location.href = '/notifications'}
+              style={{fontSize: '12px', color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer'}}
+            >
+              View All
+            </button>
+          </div>
+          {notifications.length === 0 ? (
+            <p style={{color: '#6b7280', fontSize: '14px'}}>No new notifications</p>
+          ) : (
+            <div>
+              {notifications.map((notification) => (
+                <div key={notification.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '8px',
+                  marginBottom: '8px',
+                  backgroundColor: notification.is_read ? '#f9fafb' : '#eff6ff',
+                  borderRadius: '6px',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <span style={{fontSize: '16px'}}>{getNotificationIcon(notification.notification_type)}</span>
+                  <div style={{flex: 1}}>
+                    <p style={{margin: 0, fontSize: '13px', fontWeight: '500'}}>{notification.title}</p>
+                    <p style={{margin: 0, fontSize: '12px', color: '#6b7280'}}>{notification.message}</p>
+                  </div>
+                  {!notification.is_read && (
+                    <div style={{width: '6px', height: '6px', backgroundColor: '#3b82f6', borderRadius: '50%'}}></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Professional Details */}
       <div className="card">
         <h3 className="font-bold mb-4" style={{color: '#111827'}}>Professional Details</h3>
@@ -194,8 +258,8 @@ const Dashboard = () => {
             <p className="font-bold">{user?.employee_id || 'N/A'}</p>
           </div>
           <div>
-            <p style={{fontSize: '14px', color: '#6b7280'}}>Department</p>
-            <p className="font-bold">{user?.department || 'N/A'}</p>
+            <p style={{fontSize: '14px', color: '#6b7280'}}>Project</p>
+            <p className="font-bold">{user?.project || 'N/A'}</p>
           </div>
           <div>
             <p style={{fontSize: '14px', color: '#6b7280'}}>Designation</p>

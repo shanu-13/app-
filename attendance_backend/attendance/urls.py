@@ -12,4 +12,6 @@ urlpatterns = [
     path('leave/<int:leave_id>/approve/', views.approve_leave, name='approve_leave'),
     path('leave/<int:leave_id>/reject/', views.reject_leave, name='reject_leave'),
     path('admin/report/', views.admin_attendance_report, name='admin_report'),
+    path('notifications/', views.notifications, name='notifications'),
+    path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
 ]

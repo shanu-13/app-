@@ -11,6 +11,7 @@ import AdminLeaveApproval from './components/AdminLeaveApproval';
 import Attendance from './components/Attendance';
 import LeaveManagement from './components/LeaveManagement';
 import Profile from './components/Profile';
+import Notifications from './components/Notifications';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -55,6 +56,11 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <Notifications />
               </ProtectedRoute>
             } />
             <Route path="/admin/employees" element={
