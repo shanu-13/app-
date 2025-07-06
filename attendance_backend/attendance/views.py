@@ -95,10 +95,15 @@ def admin_attendance_report(request):
     if request.user.role != 'admin':
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
     
+    if not request.user.organization:
+        return Response({'error': 'No organization assigned'}, status=status.HTTP_400_BAD_REQUEST)
+    
     now = timezone.now()
     records = AttendanceRecord.objects.filter(
         date__year=now.year,
-        date__month=now.month
+        date__month=now.month,
+        user__organization=request.user.organization,
+        user__is_active=True
     ).select_related('user')
     
     serializer = AttendanceRecordSerializer(records, many=True)
@@ -107,13 +112,123 @@ def admin_attendance_report(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def leave_requests(request):
+    if not request.user.organization:
+        return Response({'error': 'No organization assigned'}, status=status.HTTP_400_BAD_REQUEST)
+    
     if request.user.role == 'admin':
-        requests = LeaveRequest.objects.all().select_related('user')
+        requests = LeaveRequest.objects.filter(
+            user__organization=request.user.organization,
+            user__is_active=True
+        ).select_related('user')
     else:
         requests = LeaveRequest.objects.filter(user=request.user)
     
     serializer = LeaveRequestSerializer(requests, many=True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def employees_leave_management(request):
+    """Get all employees in organization with their leave information for admin management"""
+    if request.user.role != 'admin':
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+    
+    if not request.user.organization:
+        return Response({'error': 'No organization assigned'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    employees = User.objects.filter(
+        organization=request.user.organization,
+        role='employee',
+        is_active=True
+    ).prefetch_related('leaverequest_set')
+    
+    employee_data = []
+    for employee in employees:
+        # Get recent leave requests
+        recent_leaves = employee.leaverequest_set.all()[:5]
+        
+        # Get current month leave balance
+        now = timezone.now()
+        balance, _ = MonthlyLeaveBalance.objects.get_or_create(
+            user=employee,
+            year=now.year,
+            month=now.month,
+            defaults={'total_allowed': 4, 'used_leaves': 0, 'remaining_leaves': 4}
+        )
+        
+        employee_data.append({
+            'id': employee.id,
+            'employee_id': employee.employee_id,
+            'name': f"{employee.first_name} {employee.last_name}",
+            'username': employee.username,
+            'email': employee.email,
+            'designation': employee.designation,
+            'project': employee.project,
+            'leave_balance': {
+                'total_allowed': balance.total_allowed,
+                'used_leaves': balance.used_leaves,
+                'remaining_leaves': balance.remaining_leaves
+            },
+            'recent_leave_requests': LeaveRequestSerializer(recent_leaves, many=True).data
+        })
+    
+    return Response(employee_data)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def debug_organization_users(request):
+    """Debug endpoint to check organization assignments"""
+    if request.user.role != 'admin':
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+    
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    debug_info = {
+        'current_admin': {
+            'id': request.user.id,
+            'username': request.user.username,
+            'organization_id': request.user.organization.id if request.user.organization else None,
+            'organization_name': request.user.organization.name if request.user.organization else None,
+        },
+        'all_users_in_org': [],
+        'leave_requests_in_org': []
+    }
+    
+    if request.user.organization:
+        # Get all users in the same organization
+        org_users = User.objects.filter(organization=request.user.organization)
+        for user in org_users:
+            debug_info['all_users_in_org'].append({
+                'id': user.id,
+                'username': user.username,
+                'role': user.role,
+                'is_active': user.is_active,
+                'employee_id': user.employee_id,
+                'organization_id': user.organization.id if user.organization else None
+            })
+        
+        # Get all leave requests in the organization
+        leave_requests = LeaveRequest.objects.filter(
+            user__organization=request.user.organization
+        ).select_related('user')
+        
+        for leave in leave_requests:
+            debug_info['leave_requests_in_org'].append({
+                'id': leave.id,
+                'user_id': leave.user.id,
+                'username': leave.user.username,
+                'employee_id': leave.user.employee_id,
+                'leave_type': leave.leave_type,
+                'status': leave.status,
+                'start_date': str(leave.start_date),
+                'user_is_active': leave.user.is_active
+            })
+    
+    return Response(debug_info)
 
 @api_view(['PATCH'])
 @permission_classes([permissions.IsAuthenticated])

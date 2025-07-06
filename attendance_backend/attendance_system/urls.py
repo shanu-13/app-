@@ -22,9 +22,10 @@ from django.http import JsonResponse
 
 def api_root(request):
     return JsonResponse({
-        'message': 'Attendance System API',
+        'message': 'Professional Attendance Management System API',
         'endpoints': {
             'admin': '/admin/',
+            'organizations': '/api/organizations/',
             'auth': '/api/auth/',
             'attendance': '/api/attendance/'
         }
@@ -33,6 +34,7 @@ def api_root(request):
 urlpatterns = [
     path('', api_root, name='api_root'),
     path('admin/', admin.site.urls),
+    path('api/organizations/', include('organizations.urls')),
     path('api/auth/', include('accounts.urls')),
     path('api/attendance/', include('attendance.urls')),
 ]

@@ -55,7 +55,8 @@ const Layout = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    localStorage.removeItem('selectedOrganization');
+    navigate('/');
   };
 
   const isActive = (href) => location.pathname === href;
@@ -64,8 +65,8 @@ const Layout = ({ children }) => {
     <div style={{minHeight: '100vh', backgroundColor: '#f9fafb'}}>
       <div className="sidebar">
         <div className="text-center mb-4" style={{borderBottom: '2px solid #e5e7eb', paddingBottom: '20px'}}>
-          <h1 style={{fontSize: '24px', fontWeight: '700', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0}}>OrganizationHub</h1>
-          <p style={{fontSize: '12px', color: '#6b7280', margin: '4px 0'}}>Attendance Management System</p>
+          <h1 style={{fontSize: '20px', fontWeight: '700', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0}}>{user?.organization?.name || 'AttendanceHub'}</h1>
+          <p style={{fontSize: '12px', color: '#6b7280', margin: '4px 0'}}>Professional Attendance System</p>
         </div>
         
         <nav>

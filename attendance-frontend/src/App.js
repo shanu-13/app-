@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import OrganizationSelection from './components/OrganizationSelection';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Layout from './components/Layout';
@@ -12,6 +13,7 @@ import Attendance from './components/Attendance';
 import LeaveManagement from './components/LeaveManagement';
 import Profile from './components/Profile';
 import Notifications from './components/Notifications';
+import './App.css';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -48,6 +50,7 @@ function App() {
         <div className="App">
           <Toaster position="top-right" />
           <Routes>
+            <Route path="/" element={<OrganizationSelection />} />
             <Route path="/login" element={
               <PublicRoute>
                 <Login />
@@ -93,7 +96,7 @@ function App() {
                 <Profile />
               </ProtectedRoute>
             } />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
+
           </Routes>
         </div>
       </AuthProvider>

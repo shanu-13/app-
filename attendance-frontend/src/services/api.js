@@ -64,6 +64,7 @@ export const attendanceAPI = {
   getLeaveBalance: () => api.get('/attendance/leave/balance/'),
   getAdminReport: () => api.get('/attendance/admin/report/'),
   getLeaveRequests: () => api.get('/attendance/leave/requests/'),
+  getEmployeesLeaveManagement: () => api.get('/attendance/employees/leave-management/'),
   approveLeave: (leaveId) => api.patch(`/attendance/leave/${leaveId}/approve/`),
   rejectLeave: (leaveId) => api.patch(`/attendance/leave/${leaveId}/reject/`),
   getNotifications: () => api.get('/attendance/notifications/'),

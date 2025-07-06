@@ -23,7 +23,9 @@ class UserCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         if self.request.user.role != 'admin':
             raise permissions.PermissionDenied("Only admins can create users")
-        serializer.save()
+        if not self.request.user.organization:
+            raise permissions.PermissionDenied("Admin must be assigned to an organization")
+        serializer.save(organization=self.request.user.organization)
 
 class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
@@ -45,7 +47,14 @@ def user_list(request):
     if request.user.role != 'admin':
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
     
-    users = User.objects.filter(role='employee')
+    if not request.user.organization:
+        return Response({'error': 'No organization assigned'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    users = User.objects.filter(
+        role='employee', 
+        organization=request.user.organization,
+        is_active=True
+    )
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
