@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -11,16 +11,7 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const selectedOrgId = localStorage.getItem('selectedOrganization');
-    if (!selectedOrgId) {
-      navigate('/');
-      return;
-    }
-    fetchOrganization(selectedOrgId);
-  }, [navigate]);
-
-  const fetchOrganization = async (orgId) => {
+  const fetchOrganization = useCallback(async (orgId) => {
     try {
       const response = await api.get('/organizations/list/');
       const org = response.data.find(o => o.id.toString() === orgId);
@@ -29,7 +20,16 @@ const Login = () => {
       console.error('Error fetching organization:', error);
       navigate('/');
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    const selectedOrgId = localStorage.getItem('selectedOrganization');
+    if (!selectedOrgId) {
+      navigate('/');
+      return;
+    }
+    fetchOrganization(selectedOrgId);
+  }, [navigate, fetchOrganization]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

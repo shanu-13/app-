@@ -25,7 +25,8 @@ class UserCreateView(generics.CreateAPIView):
             raise permissions.PermissionDenied("Only admins can create users")
         if not self.request.user.organization:
             raise permissions.PermissionDenied("Admin must be assigned to an organization")
-        serializer.save(organization=self.request.user.organization)
+        employee = serializer.save(organization=self.request.user.organization)
+        print(f"[DEBUG] Created employee: username={employee.username}, org={employee.organization}, id={employee.id}")
 
 class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
@@ -55,6 +56,7 @@ def user_list(request):
         organization=request.user.organization,
         is_active=True
     )
+    print(f"[DEBUG] user_list for org={request.user.organization}: {[u.username for u in users]}")
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 

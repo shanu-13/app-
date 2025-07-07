@@ -25,6 +25,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         validated_data.setdefault('role', 'employee')
+        organization = self.context['request'].user.organization if 'request' in self.context and hasattr(self.context['request'].user, 'organization') else None
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -35,7 +36,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
             employee_id=validated_data.get('employee_id', ''),
             project=validated_data.get('project', ''),
             designation=validated_data.get('designation', ''),
-            date_joined_company=validated_data.get('date_joined_company')
+            date_joined_company=validated_data.get('date_joined_company'),
+            organization=organization
         )
         return user
 

@@ -15,6 +15,9 @@ User = get_user_model()
 def organization_register(request):
     try:
         data = request.data
+        # Check for existing organization email
+        if Organization.objects.filter(email=data['email']).exists():
+            return Response({'message': 'An organization with this email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Create organization
         organization = Organization.objects.create(
@@ -35,7 +38,9 @@ def organization_register(request):
         )
         admin_user.role = 'admin'
         admin_user.organization = organization
+        admin_user.is_active = True  # Ensure user is active
         admin_user.save()
+        print(f"[DEBUG] Created admin user: username={admin_user.username}, password={data['admin_password']}, is_active={admin_user.is_active}")
         
         # Create organization admin relationship
         OrganizationAdmin.objects.create(
@@ -48,14 +53,14 @@ def organization_register(request):
             'organization': {
                 'id': organization.id,
                 'name': organization.name,
-                'email': organization.email
+                'admin_username': admin_user.username,
+                'admin_email': admin_user.email,
             }
         }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
-        return Response({
-            'error': str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        print(f"[ERROR] Organization registration failed: {e}")
+        return Response({'message': 'Registration failed', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([])
