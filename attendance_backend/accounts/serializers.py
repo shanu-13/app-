@@ -1,18 +1,17 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from organizations.models import Organization
 
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
-    organization_name = serializers.CharField(source='organization.name', read_only=True)
-    
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 
                  'employee_id', 'phone', 'profile_picture', 'project', 
-                 'designation', 'date_joined_company', 'is_active', 'organization_name']
-        read_only_fields = ['id', 'organization_name']
+                 'designation', 'date_joined_company', 'is_active']
+        read_only_fields = ['id']
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -40,6 +39,50 @@ class UserCreateSerializer(serializers.ModelSerializer):
             organization=organization
         )
         return user
+
+class OrganizationRegistrationSerializer(serializers.Serializer):
+    organization_name = serializers.CharField(max_length=200)
+    organization_email = serializers.EmailField()
+    admin_username = serializers.CharField(max_length=150)
+    admin_email = serializers.EmailField()
+    admin_password = serializers.CharField(write_only=True, min_length=8)
+    admin_first_name = serializers.CharField(max_length=30)
+    admin_last_name = serializers.CharField(max_length=30)
+    
+    def validate_admin_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already exists")
+        return value
+    
+    def validate_admin_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        return value
+    
+    def validate_organization_email(self, value):
+        if Organization.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Organization email already exists")
+        return value
+    
+    def create(self, validated_data):
+        # Create organization
+        organization = Organization.objects.create(
+            name=validated_data['organization_name'],
+            email=validated_data['organization_email']
+        )
+        
+        # Create admin user
+        admin_user = User.objects.create_user(
+            username=validated_data['admin_username'],
+            email=validated_data['admin_email'],
+            password=validated_data['admin_password'],
+            first_name=validated_data['admin_first_name'],
+            last_name=validated_data['admin_last_name'],
+            role='admin',
+            organization=organization
+        )
+        
+        return organization, admin_user
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:

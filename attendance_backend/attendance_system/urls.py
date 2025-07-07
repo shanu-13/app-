@@ -22,10 +22,8 @@ from django.http import JsonResponse
 
 def api_root(request):
     return JsonResponse({
-        'message': 'Professional Attendance Management System API',
+        'message': 'Professional Attendance Management System',
         'endpoints': {
-            'admin': '/admin/',
-            'organizations': '/api/organizations/',
             'auth': '/api/auth/',
             'attendance': '/api/attendance/'
         }
@@ -34,6 +32,8 @@ def api_root(request):
 urlpatterns = [
     path('', api_root, name='api_root'),
     path('admin/', admin.site.urls),
+    path('dashboard/admin/', lambda request: __import__('accounts.views', fromlist=['admin_dashboard']).admin_dashboard(request), name='admin_dashboard'),
+    path('dashboard/employee/', lambda request: __import__('accounts.views', fromlist=['employee_dashboard']).employee_dashboard(request), name='employee_dashboard'),
     path('api/organizations/', include('organizations.urls')),
     path('api/auth/', include('accounts.urls')),
     path('api/attendance/', include('attendance.urls')),

@@ -62,9 +62,4 @@ def organization_register(request):
         print(f"[ERROR] Organization registration failed: {e}")
         return Response({'message': 'Registration failed', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-@permission_classes([])
-def organization_list(request):
-    organizations = Organization.objects.filter(is_active=True)
-    serializer = OrganizationSerializer(organizations, many=True)
-    return Response(serializer.data)
+# Organization list removed for confidentiality - no public organization visibility

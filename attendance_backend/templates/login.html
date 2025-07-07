@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e1e5e9;
+        }
+        
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Welcome Back</h1>
+            <p>Sign in to your attendance system</p>
+        </div>
+        
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                Sign In
+            </button>
+        </form>
+        
+        <div class="register-link">
+            <p>New organization? <a href="#" onclick="showRegisterForm()">Register here</a></p>
+        </div>
+    </div>
+
+    <!-- Registration Form Modal -->
+    <div id="registerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 10px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <h2 style="margin-bottom: 1rem; color: #333;">Register New Organization</h2>
+            
+            <div class="error-message" id="regErrorMessage"></div>
+            <div class="success-message" id="regSuccessMessage"></div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Organization Name</label>
+                    <input type="text" id="orgName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Organization Email</label>
+                    <input type="email" id="orgEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Admin Username</label>
+                    <input type="text" id="adminUsername" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Admin Email</label>
+                    <input type="email" id="adminEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <input type="password" id="adminPassword" required minlength="8">
+                </div>
+                
+                <div class="form-group">
+                    <label>Admin First Name</label>
+                    <input type="text" id="adminFirstName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Admin Last Name</label>
+                    <input type="text" id="adminLastName" required>
+                </div>
+                
+                <button type="submit" class="login-btn" id="registerBtn" style="margin-bottom: 1rem;">
+                    Register Organization
+                </button>
+                
+                <button type="button" onclick="hideRegisterForm()" style="width: 100%; padding: 0.75rem; background: #ccc; color: #333; border: none; border-radius: 5px; cursor: pointer;">
+                    Cancel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function hideMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+
+        function showRegisterForm() {
+            document.getElementById('registerModal').style.display = 'block';
+        }
+        
+        function hideRegisterForm() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+        
+        function showRegError(message) {
+            const errorEl = document.getElementById('regErrorMessage');
+            const successEl = document.getElementById('regSuccessMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            successEl.style.display = 'none';
+        }
+        
+        function showRegSuccess(message) {
+            const errorEl = document.getElementById('regErrorMessage');
+            const successEl = document.getElementById('regSuccessMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            errorEl.style.display = 'none';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessages();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+            
+            try {
+                const response = await fetch('/api/auth/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    localStorage.setItem('user_data', JSON.stringify(data.user));
+                    
+                    showSuccess('Login successful! Redirecting...');
+                    
+                    setTimeout(() => {
+                        if (data.user.role === 'admin') {
+                            window.location.href = '/dashboard/admin';
+                        } else {
+                            window.location.href = '/dashboard/employee';
+                        }
+                    }, 1000);
+                } else {
+                    showError(data.detail || 'Invalid username or password');
+                }
+            } catch (error) {
+                showError('Connection error. Please try again.');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
+        });
+        
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const registerBtn = document.getElementById('registerBtn');
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Registering...';
+            
+            try {
+                const response = await fetch('/api/auth/register-organization/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        organization_name: document.getElementById('orgName').value,
+                        organization_email: document.getElementById('orgEmail').value,
+                        admin_username: document.getElementById('adminUsername').value,
+                        admin_email: document.getElementById('adminEmail').value,
+                        admin_password: document.getElementById('adminPassword').value,
+                        admin_first_name: document.getElementById('adminFirstName').value,
+                        admin_last_name: document.getElementById('adminLastName').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showRegSuccess('Organization registered successfully! You can now login with username: ' + data.admin_username);
+                    setTimeout(() => {
+                        hideRegisterForm();
+                        document.getElementById('username').value = data.admin_username;
+                    }, 2000);
+                } else {
+                    showRegError(data.error || Object.values(data)[0] || 'Registration failed');
+                }
+            } catch (error) {
+                showRegError('Connection error. Please try again.');
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Register Organization';
+            }
+        });
+    </script>
+</body>
+</html>

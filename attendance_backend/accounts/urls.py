@@ -3,6 +3,9 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 
 urlpatterns = [
+    path('portal/', views.login_portal, name='login_portal'),
+    path('organizations/', views.organizations_dummy, name='organizations_dummy'),
+    path('register-organization/', views.OrganizationRegistrationView.as_view(), name='register_organization'),
     path('login/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('create-user/', views.UserCreateView.as_view(), name='create_user'),
